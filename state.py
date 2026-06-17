@@ -1,28 +1,6 @@
 from typing import TypedDict
 
 
-class Concern(TypedDict):
-
-    id: str
-
-    description: str
-
-    severity: str
-
-    category: str
-
-    status: str
-
-    rationale: str
-
-
-class Review(TypedDict):
-
-    reviewer: str
-
-    review: str
-
-
 class DecisionContext(TypedDict):
 
     facts: list[str]
@@ -42,16 +20,35 @@ class DecisionContext(TypedDict):
     open_questions: list[str]
 
 
+class DeliberationComment(TypedDict):
+
+    author: str
+
+    comment: str
+
+
 class AgentState(TypedDict):
 
     prd: dict
 
     decision_context: DecisionContext
 
-    architecture_v1: str
+    gpt_initial_position: str
 
-    reviews: list[Review]
+    gemini_initial_position: str
 
-    concerns: list[Concern]
+    deliberation_history: list[DeliberationComment]
 
-    approved: bool
+    gpt_final_position: str
+
+    gemini_final_position: str
+
+    consensus_artifact: str
+
+    total_prompt_tokens: int
+
+    total_completion_tokens: int
+
+    estimated_cost: float
+
+    llm_calls: int

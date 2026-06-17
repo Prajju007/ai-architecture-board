@@ -7,9 +7,12 @@ from state import AgentState
 
 from agents import (
     problem_framer,
-    architect,
-    reviewer,
-    consensus
+    gpt_initial_position,
+    gemini_initial_position,
+    gpt_deliberation,
+    gemini_deliberation,
+    gpt_final_position,
+    gemini_final_position
 )
 
 builder = StateGraph(
@@ -22,18 +25,43 @@ builder.add_node(
 )
 
 builder.add_node(
-    "architect",
-    architect
+    "gpt_initial_position",
+    gpt_initial_position
 )
 
 builder.add_node(
-    "reviewer",
-    reviewer
+    "gemini_initial_position",
+    gemini_initial_position
 )
 
 builder.add_node(
-    "consensus",
-    consensus
+    "gpt_deliberation_r1",
+    gpt_deliberation
+)
+
+builder.add_node(
+    "gemini_deliberation_r1",
+    gemini_deliberation
+)
+
+builder.add_node(
+    "gpt_deliberation_r2",
+    gpt_deliberation
+)
+
+builder.add_node(
+    "gemini_deliberation_r2",
+    gemini_deliberation
+)
+
+builder.add_node(
+    "gpt_final_position",
+    gpt_final_position
+)
+
+builder.add_node(
+    "gemini_final_position",
+    gemini_final_position
 )
 
 builder.set_entry_point(
@@ -42,21 +70,46 @@ builder.set_entry_point(
 
 builder.add_edge(
     "problem_framer",
-    "architect"
+    "gpt_initial_position"
 )
 
 builder.add_edge(
-    "architect",
-    "reviewer"
+    "gpt_initial_position",
+    "gemini_initial_position"
 )
 
 builder.add_edge(
-    "reviewer",
-    "consensus"
+    "gemini_initial_position",
+    "gpt_deliberation_r1"
 )
 
 builder.add_edge(
-    "consensus",
+    "gpt_deliberation_r1",
+    "gemini_deliberation_r1"
+)
+
+builder.add_edge(
+    "gemini_deliberation_r1",
+    "gpt_deliberation_r2"
+)
+
+builder.add_edge(
+    "gpt_deliberation_r2",
+    "gemini_deliberation_r2"
+)
+
+builder.add_edge(
+    "gemini_deliberation_r2",
+    "gpt_final_position"
+)
+
+builder.add_edge(
+    "gpt_final_position",
+    "gemini_final_position"
+)
+
+builder.add_edge(
+    "gemini_final_position",
     END
 )
 

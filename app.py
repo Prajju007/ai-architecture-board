@@ -6,6 +6,6 @@ from agents import architect, reviewer, consensus
 # Initialize the graph
 graph = StateGraph(AgentState)
 
-print("Graph initialized successfully!")
+print("AI Engineering Board")
 
 # (We will add nodes and edges in the next step)
