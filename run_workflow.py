@@ -16,6 +16,8 @@ initial_state = {
 
     "reviews": [],
 
+    "concerns": [],
+
     "approved": False
 }
 

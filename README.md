@@ -262,3 +262,121 @@ The long-term objective is to create a persistent engineering decision system ca
 * Assisting implementation
 
 while maintaining transparency and governance throughout the engineering lifecycle.
+
+# Latest Architectural Decision (V3)
+
+## Decision
+
+The board will evolve from a traditional Architect → Reviewer workflow into a structured multi-model engineering deliberation system.
+
+Previous approach:
+
+PRD
+↓
+Problem Framer
+↓
+Decision Context
+↓
+Architect
+↓
+Reviewer
+↓
+Consensus
+
+New approach:
+
+PRD
+↓
+Problem Framer
+↓
+Decision Context
+↓
+GPT Initial Position
+
+Gemini Initial Position
+↓
+Deliberation Round 1
+↓
+Deliberation Round 2
+↓
+Deliberation Round 3
+↓
+GPT Final Position
+
+Gemini Final Position
+↓
+Claude Synthesis
+↓
+Consensus Artifact
+↓
+Human Decision
+
+## Rationale
+
+The previous architecture assigned fixed roles to models:
+
+* GPT = Architect
+* Gemini = Reviewer
+
+This constrained Gemini to reviewing the architecture proposed by GPT rather than contributing independent architectural reasoning.
+
+The board's objective is not review alone. The objective is to explore architectural trade-offs through multiple engineering perspectives.
+
+To achieve this, models will participate as independent architects rather than fixed reviewers.
+
+## Deliberation Principles
+
+### Independent Thinking First
+
+GPT and Gemini generate their initial positions independently before seeing each other's reasoning.
+
+This prevents anchoring bias and encourages diverse architectural options.
+
+### Collaborative Deliberation
+
+The deliberation process is not a debate.
+
+Models should:
+
+* Identify agreements
+* Identify disagreements
+* Surface assumptions
+* Surface trade-offs
+* Highlight missing information
+* Update their positions when appropriate
+
+Models should not attempt to "win" an argument.
+
+### Bounded Deliberation
+
+The discussion is limited to three rounds.
+
+This prevents endless agent loops and unnecessary token consumption.
+
+### Claude as Synthesizer
+
+Claude does not act as a judge.
+
+Claude receives the complete deliberation transcript and produces:
+
+* Agreements
+* Disagreements
+* Open Questions
+* Decision Drivers
+* Recommendation
+
+### Human Decision Authority
+
+The final decision always remains with the human operator.
+
+The board assists engineering decisions but does not own them.
+
+## Expected Benefits
+
+* Independent architectural thinking
+* Reduced anchoring bias
+* Richer trade-off exploration
+* Better engineering discussions
+* More realistic architecture review board behavior
+* Stronger foundation for future ADRs, memory, and organizational learning
+

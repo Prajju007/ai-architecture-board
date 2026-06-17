@@ -153,8 +153,14 @@ Return ONLY JSON.
 Format:
 
 {{
-    "review": "",
-    "concerns": []
+  "review": "",
+  "concerns": [
+    {{
+      "severity": "LOW|MEDIUM|HIGH|CRITICAL",
+      "category": "",
+      "description": ""
+    }}
+  ]
 }}
 """
 
@@ -179,44 +185,85 @@ Format:
         response_text.strip()
     )
 
-    review_record = {
-        "reviewer": "Gemini 3.1 Pro",
-        "review": result["review"],
-        "concerns": result["concerns"]
-    }
-
     reviews = state.get(
         "reviews",
         []
     )
+
+    concerns = state.get(
+        "concerns",
+        []
+    )
+
+    review_record = {
+        "reviewer": "Gemini 3.1 Pro",
+        "review": result["review"]
+    }
 
     reviews.append(
         review_record
     )
 
+    existing_count = len(
+        concerns
+    )
+
+    for index, concern in enumerate(
+        result["concerns"],
+        start=1
+    ):
+
+        concern_record = {
+
+            "id":
+            f"C{existing_count + index:03d}",
+
+            "description":
+            concern["description"],
+
+            "severity":
+            concern["severity"],
+
+            "category":
+            concern["category"],
+
+            "status":
+            "OPEN",
+
+            "rationale":
+            ""
+        }
+
+        concerns.append(
+            concern_record
+        )
+
     return {
-        "reviews": reviews
+
+        "reviews": reviews,
+
+        "concerns": concerns
     }
 
 
 def consensus(state):
 
-    reviews = state.get(
-        "reviews",
+    concerns = state.get(
+        "concerns",
         []
     )
 
-    if not reviews:
-        return {
-            "approved": False
-        }
+    open_concerns = [
 
-    latest_review = reviews[-1]
+        concern
+
+        for concern in concerns
+
+        if concern["status"] == "OPEN"
+    ]
 
     approved = (
-        len(
-            latest_review["concerns"]
-        ) == 0
+        len(open_concerns) == 0
     )
 
     return {
