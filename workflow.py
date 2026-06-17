@@ -6,6 +6,7 @@ from langgraph.graph import (
 from state import AgentState
 
 from agents import (
+    problem_framer,
     architect,
     reviewer,
     consensus
@@ -13,6 +14,11 @@ from agents import (
 
 builder = StateGraph(
     AgentState
+)
+
+builder.add_node(
+    "problem_framer",
+    problem_framer
 )
 
 builder.add_node(
@@ -31,6 +37,11 @@ builder.add_node(
 )
 
 builder.set_entry_point(
+    "problem_framer"
+)
+
+builder.add_edge(
+    "problem_framer",
     "architect"
 )
 

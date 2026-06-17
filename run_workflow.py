@@ -1,16 +1,16 @@
+import json
+
 from workflow import graph
+
+
+with open("sample_prd.json", "r") as f:
+    prd = json.load(f)
 
 initial_state = {
 
-    "requirement": """
-Build an AI architecture board.
+    "prd": prd,
 
-Multiple LLMs should discuss architecture decisions.
-
-Decision history should be retained.
-
-Claude should eventually execute approved decisions.
-""",
+    "decision_context": {},
 
     "architecture_v1": "",
 

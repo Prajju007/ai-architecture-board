@@ -11,40 +11,118 @@ from config import (
 )
 
 
-def architect(state):
-    """
-    GPT-4o generates Architecture V1
-    """
+def problem_framer(state):
 
     client = OpenAI(
         api_key=OPENAI_API_KEY
     )
 
+    prd = state["prd"]
+
+    prompt = f"""
+You are a Principal Engineer.
+
+Analyze the following PRD.
+
+PRD:
+
+{json.dumps(prd, indent=2)}
+
+Return ONLY valid JSON.
+
+Format:
+
+{{
+    "facts": [],
+    "constraints": [],
+    "assumptions": [],
+    "unknowns": [],
+    "risks": [],
+    "tradeoffs": [],
+    "success_criteria": [],
+    "open_questions": []
+}}
+"""
+
     response = client.chat.completions.create(
         model=GPT_MODEL,
         messages=[
             {
-                "role": "system",
-                "content": """
-You are a Principal Software Architect.
-
-Your task is to propose a robust architecture.
-
-Focus on:
-- Scalability
-- Maintainability
-- Cost Optimization
-- Simplicity
-"""
-            },
-            {
                 "role": "user",
-                "content": state["requirement"]
+                "content": prompt
             }
         ]
     )
 
-    architecture = response.choices[0].message.content
+    response_text = (
+        response
+        .choices[0]
+        .message
+        .content
+        .strip()
+    )
+
+    if response_text.startswith("```json"):
+        response_text = response_text.replace(
+            "```json",
+            "",
+            1
+        )
+
+    if response_text.endswith("```"):
+        response_text = response_text[:-3]
+
+    result = json.loads(
+        response_text.strip()
+    )
+
+    return {
+        "decision_context": result
+    }
+
+
+def architect(state):
+
+    client = OpenAI(
+        api_key=OPENAI_API_KEY
+    )
+
+    context = state["decision_context"]
+
+    prompt = f"""
+You are a Principal Software Architect.
+
+Create an architecture proposal.
+
+Decision Context:
+
+{json.dumps(context, indent=2)}
+
+The architecture must respect:
+
+- Constraints
+- Non-goals
+- Success Criteria
+
+Avoid unnecessary complexity.
+"""
+
+    response = client.chat.completions.create(
+        model=GPT_MODEL,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    architecture = (
+        response
+        .choices[0]
+        .message
+        .content
+    )
 
     return {
         "architecture_v1": architecture
@@ -52,9 +130,6 @@ Focus on:
 
 
 def reviewer(state):
-    """
-    Gemini reviews Architecture V1
-    """
 
     client = genai.Client(
         api_key=GOOGLE_API_KEY
@@ -63,29 +138,24 @@ def reviewer(state):
     prompt = f"""
 You are a Principal Architecture Reviewer.
 
-Review the architecture.
+Decision Context:
 
-Requirement:
-
-{state["requirement"]}
+{json.dumps(state["decision_context"], indent=2)}
 
 Architecture:
 
 {state["architecture_v1"]}
 
-Return ONLY valid JSON.
+Review the architecture.
+
+Return ONLY JSON.
 
 Format:
 
 {{
-    "review": "Overall assessment",
-    "concerns": [
-        "Concern 1",
-        "Concern 2"
-    ]
+    "review": "",
+    "concerns": []
 }}
-
-Do NOT wrap the JSON inside markdown.
 """
 
     response = client.models.generate_content(
@@ -105,9 +175,9 @@ Do NOT wrap the JSON inside markdown.
     if response_text.endswith("```"):
         response_text = response_text[:-3]
 
-    response_text = response_text.strip()
-
-    result = json.loads(response_text)
+    result = json.loads(
+        response_text.strip()
+    )
 
     review_record = {
         "reviewer": "Gemini 3.1 Pro",
@@ -130,9 +200,6 @@ Do NOT wrap the JSON inside markdown.
 
 
 def consensus(state):
-    """
-    Determine consensus.
-    """
 
     reviews = state.get(
         "reviews",
