@@ -1,0 +1,29 @@
+{
+  "title": "AI Architecture Board",
+
+  "problem_statement":
+    "Build an AI board where multiple LLMs discuss architecture decisions.",
+
+  "goals": [
+    "Improve decision quality",
+    "Retain decision history"
+  ],
+
+  "non_goals": [
+    "Production deployment",
+    "Enterprise RBAC"
+  ],
+
+  "constraints": [
+    "Low cost",
+    "Single developer"
+  ],
+
+  "success_criteria": [
+    "Better decisions than a single model"
+  ],
+
+  "budget": "Low",
+
+  "timeline": "Prototype"
+}
