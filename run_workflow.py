@@ -2,7 +2,9 @@
 
 Usage:
   python run_workflow.py                              # uses sample_prd.json, 2 rounds
-  python run_workflow.py --prd my_prd.json            # custom PRD
+  python run_workflow.py --prd my_prd.json            # custom PRD (JSON)
+  python run_workflow.py --prd README.md              # any text/Markdown file (auto-converted to PRD)
+  python run_workflow.py --prd problem.txt            # plain text (auto-converted to PRD)
   python run_workflow.py --prd my_prd.json --rounds 3 # more deliberation rounds
   python run_workflow.py --resume deliberations/2026-06-18_xxx/session.json
   python run_workflow.py --list                       # list saved sessions
@@ -15,7 +17,39 @@ import sys
 import glob
 
 from workflow import build_graph
+from agents import generate_prd
 from core.persistence import generate_session_id, get_output_dir, save_session, load_session
+
+
+def load_prd_input(prd_path: str) -> dict:
+    """Load a PRD from any file format.
+
+    If the file is JSON, parse it directly.
+    If the file is any other format (Markdown, text, README, etc.),
+    use GPT to convert it into a structured PRD.
+
+    Args:
+        prd_path: Path to the PRD file (JSON, Markdown, or plain text).
+
+    Returns:
+        A PRD dict.
+    """
+    with open(prd_path, "r") as f:
+        content = f.read()
+
+    # Try parsing as JSON first
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # Not JSON — use GPT to generate a PRD from the content
+    filename = os.path.basename(prd_path)
+    print(f"File '{filename}' is not JSON — generating PRD from content using GPT...")
+    prd = generate_prd(content, source_name=filename)
+    print(f"Generated PRD: {prd.get('title', 'Unknown')}")
+    print()
+    return prd
 
 
 def list_sessions(base_dir: str = "deliberations"):
@@ -165,7 +199,7 @@ def main():
     parser.add_argument(
         "--prd",
         default="sample_prd.json",
-        help="Path to the PRD JSON file (default: sample_prd.json)",
+        help="Path to PRD file — JSON, Markdown, or plain text (default: sample_prd.json)",
     )
     parser.add_argument(
         "--rounds",
@@ -202,8 +236,8 @@ def main():
         print(f"Error: PRD file not found: {args.prd}")
         sys.exit(1)
 
-    with open(args.prd, "r") as f:
-        prd = json.load(f)
+    # Load PRD — auto-detects JSON vs other formats
+    prd = load_prd_input(args.prd)
 
     session_id = generate_session_id(prd.get("title", "untitled"))
     output_dir = get_output_dir(session_id)
